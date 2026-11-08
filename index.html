@@ -1,0 +1,89 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Coin Identifier</title><style>
+body.theme-home{background:#C8E6C9;} body.theme-penny{background:#D27D46;} body.theme-nickel{background:#C0C0C0;}
+body.theme-dime{background:#E5E4E2;} body.theme-quarter{background:#BCC6CC;} body.theme-half{background:#A1CAF1;} body.theme-dollar{background:#D4AF37;}
+body{font-family:sans-serif;margin:0;padding:0;display:flex;flex-direction:column;min-height:100vh;transition:background 0.3s;}
+hdr,ftr{background:#333;color:white;padding:12px;text-align:center;font-weight:bold;} .logo{color:#FFD700;cursor:pointer;}
+main{flex:1;display:flex;justify-content:center;align-items:center;padding:15px;}
+.box{background:white;width:100%;max-width:420px;padding:20px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+h1{text-align:center;font-size:20px;margin-top:0;} .w-txt{text-align:center;font-size:22px;font-weight:bold;color:#FFD700;margin-bottom:5px;text-shadow:1px 1px 2px #000;}
+.page{display:none;} .page.active{display:block;} .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px;}
+.m-btn{padding:15px;font-weight:bold;color:white;border:none;border-radius:8px;cursor:pointer;}
+.p-btn{background:#A0522D;} .n-btn{background:#8A9597;} .d-btn {background:#708090;} .q-btn{background:#4F6272;} .h-btn{background:#4682B4;} .dl-btn{background:#CD7F32;}
+.f-gp{margin-bottom:12px;} label{display:block;font-weight:bold;margin-bottom:4px;font-size:13px;}
+select,input{width:100%;padding:10px;border:1px solid #CCC;border-radius:6px;font-size:16px;box-sizing:border-box;}
+.go-btn{width:100%;background:#343A40;color:white;border:none;padding:12px;font-weight:bold;border-radius:6px;margin-top:8px;cursor:pointer;}
+.bk-btn{background:none;border:1px solid #6C757D;padding:6px 12px;border-radius:6px;cursor:pointer;margin-bottom:15px;color:#6C757D;font-weight:bold;}
+.res{margin-top:15px;padding:12px;background:#F8F9FA;border:2px dashed #CED4DA;border-radius:8px;text-align:center;}
+.val{font-size:20px;font-weight:bold;color:#2E7D32;margin-bottom:4px;} .desc{font-size:13px;color:#495057;}
+/* New Camera Button & Photo Grid Styling */
+.cam-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;margin-bottom:15px;}
+.cam-label{display:block;background:#6c757d;color:white;text-align:center;padding:10px;border-radius:6px;font-weight:bold;font-size:13px;cursor:pointer;}
+.cam-label:active{background:#495057;} .img-prev{width:100%;height:100px;object-fit:contain;border:1px solid #ddd;border-radius:6px;margin-top:5px;display:none;}
+</style></head><body class="theme-home">
+<hdr><div class="logo" onclick="go('home')">🪙 CoinIdentifier.com</div></hdr>
+<main><div class="box">
+    <!-- MENU -->
+    <div id="p-home" class="page active"><div class="w-txt">Welcome To The Coin Identifier</div><h1>Select a Coin Below</h1>
+        <div class="grid">
+            <button class="m-btn p-btn" onclick="go('penny')">Penny (1¢)</button><button class="m-btn n-btn" onclick="go('nickel')">Nickel (5¢)</button>
+            <button class="m-btn d-btn" onclick="go('dime')">Dime (10¢)</button><button class="m-btn q-btn" onclick="go('quarter')">Quarter (25¢)</button>
+            <button class="m-btn h-btn" onclick="go('half')">Half Dollar (50¢)</button><button class="m-btn dl-btn" onclick="go('dollar')">Dollar ($1)</button>
+        </div></div>
+    <!-- APPRAISER -->
+    <div id="p-app" class="page"><button class="bk-btn" onclick="go('home')">← Back</button><h1 id="title">Appraiser</h1>
+        <!-- Photo Options Grid -->
+        <label>Optional: Upload Coin Photos</label>
+        <div class="cam-grid">
+            <div><label for="camFront" class="cam-label">📸 Front Photo</label><input type="file" id="camFront" accept="image/*" style="display:none" onchange="prev(this,'pFront')"><img id="pFront" class="img-prev"></div>
+            <div><label for="camBack" class="cam-label">📸 Back Photo</label><input type="file" id="camBack" accept="image/*" style="display:none" onchange="prev(this,'pBack')"><img id="pBack" class="img-prev"></div>
+        </div>
+        <!-- Manual Typing Options -->
+        <div class="f-gp"><label>Mint Year</label><input type="number" id="yr" value="2023"></div>
+        <div class="f-gp"><label>Mint Mark</label><select id="mint"><option value="None">None (Philly)</option><option value="D">D (Denver)</option><option value="S">S (San Francisco)</option><option value="W">W (West Point)</option><option value="CC">CC (Carson City)</option></select></div>
+        <div class="f-gp"><label>Condition</label><select id="cond"><option value="worn">Worn</option><option value="avg" selected>Average</option><option value="mint">Uncirculated</option></select></div>
+        <button class="go-btn" onclick="run()">Appraise Coin</button>
+        <div class="res"><div id="vDisp" class="val">$0.00</div><div id="dDisp" class="desc">Loading...</div></div></div>
+</div></main><footer>&copy; 2026 The Coin Identifier.</footer>
+<script>
+let cur='home';
+const DATA={
+    penny:{name:"Penny",yr:2023,base:0.01,info:"Lincoln Cent. Pre-1982 coins are 95% copper.",errors:{"1943":{"None":["1943 Copper Error",150000,"Rare copper error. Won't stick to a magnet!"]},"1955":{"None":["1955 Doubled Die",1500,"Dramatic text doubling on the front."]}}},
+    nickel:{name:"Nickel",yr:1937,base:0.05,info:"Jefferson/Buffalo. 1942-45 war coins contain silver.",errors:{"1937":{"D":["3-Legged Buffalo",600,"Back leg is missing due to a die error."]}}},
+    dime:{name:"Dime",yr:1964,base:0.10,info:"Roosevelt/Mercury. 1964 and older are 90% silver.",errors:{"1916":{"S":["1916-D Mercury",1000,"Very rare key date collector dime."]}}},
+    quarter:{name:"Quarter",yr:2019,base:0.25,info:"Washington Quarter. 1964 and older are 90% silver.",errors:{"2019":{"W":["West Point Quarter",15,"Rare 'W' mint mark dropped straight into change."]}}},
+    half:{name:"Half Dollar",yr:1964,base:0.50,info:"Kennedy/Franklin. 1964 and older are 90% silver.",errors:{"1964":{"None":["1964 Silver Kennedy",10,"90% pure silver precious metal content."]}}},
+    dollar:{name:"Dollar Coin",yr:1889,base:1.00,info:"Morgan/Peace silver dollars hold high historical value.",errors:{"1889":{"CC":["1889-CC Morgan",800,"Famous Carson City Mint classic dollar."]}}}
+};
+function go(p){
+    cur=p;document.body.className=`theme-${p}`;document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+    if(p==='home'){document.getElementById('p-home').classList.add('active');}
+    else{
+        document.getElementById('p-app').classList.add('active');document.getElementById('title').innerText=DATA[p].name;
+        document.getElementById('yr').value=DATA[p].yr;document.getElementById('vDisp').innerText=`$${DATA[p].base.toFixed(2)}`;
+        document.getElementById('vDisp').style.color="#2E7D32";document.getElementById('dDisp').innerText=DATA[p].info;
+        document.getElementById('pFront').style.display='none';document.getElementById('pBack').style.display='none';
+        document.getElementById('camFront').value='';document.getElementById('camBack').value='';
+    }
+}
+function prev(input, id) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById(id);
+            img.src = e.target.result; img.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    }
+}
+function run(){
+    if(cur=='home')return;const y=document.getElementById('yr').value.trim(),m=document.getElementById('mint').value,c=document.getElementById('cond').value;
+    if(!y)return;const d=DATA[cur];let v=d.base,err=null;
+    if(d.errors[y]&&d.errors[y][m]){err=d.errors[y][m];v=err;}else{if((cur==='dime'||cur==='quarter'||cur==='half')&&parseInt(y)<=1964)v=d.base*10;}
+    if(c==='worn'&&v>d.base)v*=0.5;else if(c==='mint')v=(v===d.base)?(d.base*1.5):(v*2.5);
+    const vD=document.getElementById('vDisp');vD.innerText=`Estimated Value: $${v.toLocaleString(undefined,{minimumFractionDigits:2})}`;
+    if(err){vD.style.color="#B22222";document.getElementById('dDisp').innerHTML=`<strong>★ RARE: ${err[0]} ★</strong><br>${err[2]}`;}
+    else{vD.style.color="#2E7D32";document.getElementById('dDisp').innerHTML=`Standard Issue.<br>${d.info}`;}
+}
+</script></body></html>
